@@ -4,96 +4,191 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>シンプル家計簿</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&display=swap');
+        
+        :root {
+            --primary-color: #6c5ce7;
+            --primary-light: #a29bfe;
+            --secondary-color: #00cec9;
+            --accent-color: #fd79a8;
+            --background: #f9f9f9;
+            --card-bg: #ffffff;
+            --text-primary: #2d3436;
+            --text-secondary: #636e72;
+            --expense-color: #ff7675;
+            --income-color: #55efc4;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --border-radius: 16px;
+        }
+        
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: Arial, sans-serif;
+            font-family: 'Noto Sans JP', sans-serif;
         }
         
         body {
-            background-color: #f5f5f5;
-            padding: 20px;
+            background-color: var(--background);
+            padding: 24px 16px;
             max-width: 500px;
             margin: 0 auto;
+            color: var(--text-primary);
         }
         
         header {
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 24px;
         }
         
         h1 {
-            color: #333;
-            margin-bottom: 5px;
-            font-size: 24px;
+            color: var(--primary-color);
+            margin-bottom: 8px;
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+        
+        header p {
+            color: var(--text-secondary);
+            font-size: 14px;
         }
         
         .card {
-            background: white;
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: var(--shadow);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 8px;
+            height: 100%;
+            background: linear-gradient(to bottom, var(--primary-color), var(--secondary-color));
+            border-top-left-radius: var(--border-radius);
+            border-bottom-left-radius: var(--border-radius);
         }
         
         .balance {
             text-align: center;
             font-size: 18px;
-            margin-bottom: 5px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            position: relative;
         }
         
         .balance-amount {
-            font-size: 32px;
-            font-weight: bold;
-            color: #2c3e50;
+            font-size: 40px;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .balance-card {
+            position: relative;
+            padding-bottom: 12px;
+        }
+        
+        .balance-card::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 4px;
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+            border-radius: 2px;
         }
         
         .form-group {
-            margin-bottom: 15px;
+            margin-bottom: 20px;
+            position: relative;
         }
         
         label {
             display: block;
-            margin-bottom: 5px;
-            color: #555;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+            font-size: 14px;
+            font-weight: 500;
         }
         
         input, select {
             width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
+            padding: 14px 16px;
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
             font-size: 16px;
+            transition: all 0.3s ease;
+            color: var(--text-primary);
+            background-color: #f5f5f5;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary-light);
+            box-shadow: 0 0 0 3px rgba(162, 155, 254, 0.2);
+            background-color: #fff;
         }
         
         button {
-            background: #3498db;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
             color: white;
             border: none;
-            padding: 12px;
+            padding: 16px;
             width: 100%;
-            border-radius: 4px;
+            border-radius: 12px;
             font-size: 16px;
+            font-weight: 600;
             cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 10px rgba(108, 92, 231, 0.2);
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(108, 92, 231, 0.3);
+        }
+        
+        button:active {
+            transform: translateY(0);
+            box-shadow: 0 4px 10px rgba(108, 92, 231, 0.2);
         }
         
         .transaction-type {
             display: flex;
-            margin-bottom: 15px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
+            margin-bottom: 20px;
+            background: #f5f5f5;
+            border-radius: 12px;
             overflow: hidden;
+            position: relative;
+            padding: 4px;
         }
         
         .transaction-type label {
             flex: 1;
             text-align: center;
-            padding: 10px;
+            padding: 12px;
             cursor: pointer;
             margin: 0;
-            transition: background-color 0.3s;
+            z-index: 1;
+            transition: color 0.3s;
+            font-weight: 500;
+            border-radius: 10px;
         }
         
         .transaction-type input {
@@ -101,8 +196,28 @@
         }
         
         .transaction-type input:checked + label {
-            background-color: #3498db;
             color: white;
+        }
+        
+        .transaction-type input#expense:checked ~ .slide {
+            left: 4px;
+            background: var(--expense-color);
+        }
+        
+        .transaction-type input#income:checked ~ .slide {
+            left: 50%;
+            background: var(--income-color);
+        }
+        
+        .transaction-type .slide {
+            position: absolute;
+            height: calc(100% - 8px);
+            width: calc(50% - 4px);
+            left: 4px;
+            top: 4px;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            z-index: 0;
         }
         
         .transaction-list {
@@ -110,8 +225,8 @@
         }
         
         .transaction-item {
-            padding: 12px 0;
-            border-bottom: 1px solid #eee;
+            padding: 16px 0;
+            border-bottom: 1px solid #f0f0f0;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -123,79 +238,127 @@
         
         .transaction-info {
             flex: 1;
+            display: flex;
+            align-items: center;
         }
         
-        .transaction-title {
-            font-weight: bold;
-            margin-bottom: 2px;
-        }
-        
-        .transaction-date {
-            font-size: 12px;
-            color: #777;
-        }
-        
-        .transaction-amount {
-            font-weight: bold;
-            margin-right: 15px;
-        }
-        
-        .expense {
-            color: #e74c3c;
-        }
-        
-        .income {
-            color: #2ecc71;
-        }
-        
-        .section-title {
-            margin-bottom: 15px;
-            color: #333;
-            font-weight: normal;
-            font-size: 18px;
-        }
-        
-        .message {
-            text-align: center;
-            padding: 10px;
-            background: rgba(0,0,0,0.7);
-            color: white;
-            border-radius: 4px;
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            opacity: 0;
-            transition: opacity 0.3s;
-            pointer-events: none;
-        }
-        
-        .message.show {
-            opacity: 1;
-        }
-        
-        .delete-btn {
-            background-color: #e74c3c;
-            color: white;
-            border: none;
-            width: 28px;
-            height: 28px;
+        .transaction-icon {
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
+            margin-right: 14px;
             font-size: 16px;
-            cursor: pointer;
-            transition: background-color 0.2s;
+            color: white;
         }
         
-        .delete-btn:hover {
-            background-color: #c0392b;
+        .icon-food { background-color: #fdcb6e; }
+        .icon-transport { background-color: #74b9ff; }
+        .icon-entertainment { background-color: #a29bfe; }
+        .icon-daily { background-color: #55efc4; }
+        .icon-income { background-color: #00b894; }
+        .icon-other { background-color: #636e72; }
+        
+        .transaction-details {
+            flex: 1;
+        }
+        
+        .transaction-title {
+            font-weight: 500;
+            margin-bottom: 2px;
+            color: var(--text-primary);
+        }
+        
+        .transaction-date {
+            font-size: 12px;
+            color: var(--text-secondary);
         }
         
         .transaction-right {
             display: flex;
             align-items: center;
+        }
+        
+        .transaction-amount {
+            font-weight: 700;
+            margin-right: 20px;
+            font-size: 16px;
+        }
+        
+        .expense {
+            color: var(--expense-color);
+        }
+        
+        .income {
+            color: var(--income-color);
+        }
+        
+        .section-title {
+            margin-bottom: 20px;
+            color: var(--text-primary);
+            font-weight: 500;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .section-title::before {
+            content: '';
+            display: inline-block;
+            width: 6px;
+            height: 20px;
+            background: linear-gradient(to bottom, var(--primary-color), var(--secondary-color));
+            margin-right: 10px;
+            border-radius: 3px;
+        }
+        
+        .message {
+            text-align: center;
+            padding: 12px 24px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            border-radius: 50px;
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.3s, transform 0.3s;
+            pointer-events: none;
+            z-index: 1000;
+            font-weight: 500;
+            font-size: 14px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .message.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(-10px);
+        }
+        
+        .delete-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f1f1f1;
+            color: #ff6b6b;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            box-shadow: none;
+        }
+        
+        .delete-btn:hover {
+            background-color: #ff6b6b;
+            color: white;
+            transform: none;
+            box-shadow: none;
         }
         
         /* 確認モーダル */
@@ -210,19 +373,23 @@
             justify-content: center;
             align-items: center;
             z-index: 100;
+            backdrop-filter: blur(4px);
         }
         
         .confirm-dialog {
             background-color: white;
-            padding: 20px;
-            border-radius: 8px;
+            padding: 24px;
+            border-radius: 16px;
             width: 90%;
             max-width: 300px;
             text-align: center;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
         }
         
         .confirm-message {
-            margin-bottom: 20px;
+            margin-bottom: 24px;
+            font-size: 16px;
+            color: var(--text-primary);
         }
         
         .confirm-buttons {
@@ -232,31 +399,68 @@
         }
         
         .confirm-btn {
-            padding: 8px 15px;
-            border-radius: 4px;
+            padding: 12px 20px;
+            border-radius: 8px;
             border: none;
             cursor: pointer;
+            font-weight: 500;
+            font-size: 14px;
+            width: auto;
         }
         
         .confirm-cancel {
-            background-color: #95a5a6;
-            color: white;
+            background-color: #f1f1f1;
+            color: var(--text-secondary);
+            box-shadow: none;
         }
         
         .confirm-delete {
-            background-color: #e74c3c;
+            background: linear-gradient(135deg, #ff6b6b, #ff7675);
             color: white;
+            box-shadow: 0 4px 10px rgba(255, 107, 107, 0.2);
+        }
+        
+        .no-transactions {
+            text-align: center;
+            color: var(--text-secondary);
+            padding: 20px;
+            font-size: 14px;
+        }
+        
+        .no-transactions i {
+            font-size: 32px;
+            margin-bottom: 10px;
+            color: var(--primary-light);
+            opacity: 0.7;
+        }
+        
+        /* アニメーション */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .card {
+            animation: fadeIn 0.5s ease forwards;
+        }
+        
+        .card:nth-child(2) {
+            animation-delay: 0.1s;
+        }
+        
+        .card:nth-child(3) {
+            animation-delay: 0.2s;
         }
     </style>
 </head>
 <body>
     <header>
-        <h1>シンプル家計簿</h1>
-        <p>大学生の一人暮らしに</p>
+        <h1>Campus Money</h1>
+        <p>大学生の一人暮らしをサポート</p>
     </header>
     
-    <div class="card">
-        <div class="balance">残高</div>
+    <div class="card balance-card">
+        <div class="balance">今月の残高</div>
         <div class="balance-amount" id="totalBalance">¥0</div>
     </div>
     
@@ -269,6 +473,8 @@
             
             <input type="radio" id="income" name="type" value="income">
             <label for="income">収入</label>
+            
+            <div class="slide"></div>
         </div>
         
         <div class="form-group">
@@ -466,7 +672,12 @@
             transactionList.innerHTML = '';
             
             if (transactions.length === 0) {
-                transactionList.innerHTML = '<p style="text-align: center; color: #777; padding: 10px;">取引データがありません</p>';
+                transactionList.innerHTML = `
+                    <div class="no-transactions">
+                        <i class="fas fa-receipt"></i>
+                        <p>取引データがありません</p>
+                    </div>
+                `;
                 return;
             }
             
@@ -477,16 +688,43 @@
                 const li = document.createElement('li');
                 li.className = 'transaction-item';
                 
+                // カテゴリアイコンマッピング
+                const categoryIcons = {
+                    food: '<i class="fas fa-utensils"></i>',
+                    transport: '<i class="fas fa-train"></i>',
+                    entertainment: '<i class="fas fa-gamepad"></i>',
+                    daily: '<i class="fas fa-shopping-basket"></i>',
+                    income: '<i class="fas fa-wallet"></i>',
+                    other: '<i class="fas fa-ellipsis-h"></i>'
+                };
+                
+                // カテゴリ名の日本語マッピング
+                const categoryNames = {
+                    food: '食費',
+                    transport: '交通費',
+                    entertainment: '娯楽',
+                    daily: '日用品',
+                    income: '収入',
+                    other: 'その他'
+                };
+                
                 li.innerHTML = `
                     <div class="transaction-info">
-                        <div class="transaction-title">${transaction.memo}</div>
-                        <div class="transaction-date">${formatDate(transaction.date)}</div>
+                        <div class="transaction-icon icon-${transaction.category}">
+                            ${categoryIcons[transaction.category] || '<i class="fas fa-receipt"></i>'}
+                        </div>
+                        <div class="transaction-details">
+                            <div class="transaction-title">${transaction.memo}</div>
+                            <div class="transaction-date">${formatDate(transaction.date)} · ${categoryNames[transaction.category]}</div>
+                        </div>
                     </div>
                     <div class="transaction-right">
                         <div class="transaction-amount ${transaction.type === 'expense' ? 'expense' : 'income'}">
                             ${transaction.type === 'expense' ? '-' : '+'}¥${transaction.amount.toLocaleString()}
                         </div>
-                        <button class="delete-btn" data-id="${transaction.id}">×</button>
+                        <button class="delete-btn" data-id="${transaction.id}">
+                            <i class="fas fa-times"></i>
+                        </button>
                     </div>
                 `;
                 
