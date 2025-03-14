@@ -1,11 +1,10 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>大学生のための家計簿アプリ</title>
+    <title>大学生の家計簿アプリ</title>
     <style>
-        /* リセットCSS */
         * {
             margin: 0;
             padding: 0;
@@ -20,7 +19,6 @@
             touch-action: manipulation;
         }
         
-        /* モバイルファーストデザイン */
         .container {
             max-width: 420px;
             margin: 0 auto;
@@ -30,7 +28,6 @@
             position: relative;
         }
         
-        /* ヘッダー */
         header {
             background: #7c4dff;
             color: white;
@@ -71,7 +68,6 @@
             opacity: 0.8;
         }
         
-        /* タブバー */
         .tab-bar {
             display: flex;
             background: white;
@@ -83,7 +79,7 @@
         .tab {
             flex: 1;
             text-align: center;
-            padding: 10px 0;
+            padding: 12px 0;
             font-size: 0.9rem;
             color: #777;
             position: relative;
@@ -107,7 +103,6 @@
             border-radius: 10px;
         }
         
-        /* メインコンテンツ */
         .content {
             padding: 20px 15px;
         }
@@ -129,7 +124,6 @@
             -webkit-tap-highlight-color: transparent;
         }
         
-        /* 最近の取引 */
         .transactions {
             margin-top: 15px;
         }
@@ -186,16 +180,36 @@
             color: #4caf50;
         }
         
-        /* 円グラフ（Canvas用） */
         .chart-container {
             margin: 20px 0;
             height: 200px;
             position: relative;
         }
         
-        #donutChart {
-            display: block;
+        .donut-placeholder {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: conic-gradient(
+                #e57373 0% 30%,
+                #64b5f6 30% 55%,
+                #ba68c8 55% 70%,
+                #66bb6a 70% 85%,
+                #ffd54f 85% 100%
+            );
             margin: 0 auto;
+            position: relative;
+        }
+        
+        .donut-placeholder::after {
+            content: '';
+            position: absolute;
+            top: 20%;
+            left: 20%;
+            width: 60%;
+            height: 60%;
+            background: white;
+            border-radius: 50%;
         }
         
         .chart-legend {
@@ -228,7 +242,6 @@
             font-size: 0.8rem;
         }
         
-        /* 即時入力フロートボタン */
         .float-button {
             position: fixed;
             bottom: 70px;
@@ -248,7 +261,6 @@
             -webkit-tap-highlight-color: transparent;
         }
         
-        /* ナビゲーションバー */
         .navbar {
             position: fixed;
             bottom: 0;
@@ -284,10 +296,9 @@
         }
         
         .form-padding {
-            height: 70px; /* ナビゲーションバーの高さ分の余白 */
+            height: 70px;
         }
         
-        /* タブコンテンツ */
         .tab-content {
             display: none;
         }
@@ -296,7 +307,6 @@
             display: block;
         }
         
-        /* モーダル */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -304,11 +314,10 @@
             right: 0;
             bottom: 0;
             background: rgba(0, 0, 0, 0.5);
-            display: flex;
+            display: none;
             align-items: center;
             justify-content: center;
             z-index: 1000;
-            display: none;
         }
         
         .modal {
@@ -340,7 +349,7 @@
         
         .form-input {
             width: 100%;
-            padding: 10px;
+            padding: 12px;
             border: 1px solid #ddd;
             border-radius: 8px;
             font-size: 1rem;
@@ -348,7 +357,7 @@
         
         .form-select {
             width: 100%;
-            padding: 10px;
+            padding: 12px;
             border: 1px solid #ddd;
             border-radius: 8px;
             font-size: 1rem;
@@ -368,6 +377,8 @@
         
         .radio-input {
             margin-right: 5px;
+            width: 18px;
+            height: 18px;
         }
         
         .button-group {
@@ -377,7 +388,7 @@
         }
         
         .btn {
-            padding: 10px 20px;
+            padding: 12px 20px;
             border-radius: 8px;
             border: none;
             font-size: 1rem;
@@ -395,7 +406,6 @@
             color: white;
         }
         
-        /* 予算表示 */
         .budget-bar {
             margin: 15px 0;
         }
@@ -427,17 +437,6 @@
             border-radius: 4px;
         }
         
-        /* 入力フォーム用の大きいボタン (スマホ対応) */
-        .budget-input {
-            width: 100%;
-            height: 44px;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 1rem;
-        }
-        
-        /* フィードバックメッセージ */
         .feedback-message {
             position: fixed;
             bottom: 80px;
@@ -468,8 +467,8 @@
         <!-- 残高カード -->
         <div class="balance-card">
             <div class="balance-title">今月の残高</div>
-            <div class="balance-amount" id="totalBalance">¥0</div>
-            <div class="balance-period" id="currentPeriod"></div>
+            <div class="balance-amount" id="totalBalance">¥78,500</div>
+            <div class="balance-period" id="currentPeriod">3月1日 - 3月31日</div>
         </div>
         
         <!-- タブバー -->
@@ -488,7 +487,41 @@
             </div>
             
             <div class="transactions" id="recentTransactions">
-                <!-- 取引データはJavaScriptで動的に生成 -->
+                <div class="transaction-item">
+                    <div class="transaction-icon category-food">🍲</div>
+                    <div class="transaction-details">
+                        <div class="transaction-title">昼食（学食）</div>
+                        <div class="transaction-date">今日 12:30</div>
+                    </div>
+                    <div class="transaction-amount expense">-¥550</div>
+                </div>
+                
+                <div class="transaction-item">
+                    <div class="transaction-icon category-transport">🚃</div>
+                    <div class="transaction-details">
+                        <div class="transaction-title">電車（往復）</div>
+                        <div class="transaction-date">今日 9:15</div>
+                    </div>
+                    <div class="transaction-amount expense">-¥480</div>
+                </div>
+                
+                <div class="transaction-item">
+                    <div class="transaction-icon category-entertainment">🎮</div>
+                    <div class="transaction-details">
+                        <div class="transaction-title">映画チケット</div>
+                        <div class="transaction-date">昨日 19:20</div>
+                    </div>
+                    <div class="transaction-amount expense">-¥1,800</div>
+                </div>
+                
+                <div class="transaction-item">
+                    <div class="transaction-icon category-income">💼</div>
+                    <div class="transaction-details">
+                        <div class="transaction-title">アルバイト収入</div>
+                        <div class="transaction-date">3月10日</div>
+                    </div>
+                    <div class="transaction-amount income">+¥28,500</div>
+                </div>
             </div>
             
             <!-- 支出分析 -->
@@ -497,9 +530,28 @@
             </div>
             
             <div class="chart-container">
-                <canvas id="donutChart" width="200" height="200"></canvas>
-                <div class="chart-legend" id="chartLegend">
-                    <!-- 凡例はJavaScriptで動的に生成 -->
+                <div class="donut-placeholder"></div>
+                <div class="chart-legend">
+                    <div class="legend-item">
+                        <div class="legend-color color-food"></div>
+                        <div class="legend-text">食費 30%</div>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color color-transport"></div>
+                        <div class="legend-text">交通費 25%</div>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color color-entertainment"></div>
+                        <div class="legend-text">娯楽 15%</div>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color color-groceries"></div>
+                        <div class="legend-text">日用品 15%</div>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color color-others"></div>
+                        <div class="legend-text">その他 15%</div>
+                    </div>
                 </div>
             </div>
             
@@ -509,8 +561,26 @@
                 <span class="view-all" id="viewBudgetDetails">詳細</span>
             </div>
             
-            <div id="budgetStatusContainer">
-                <!-- 予算ステータスはJavaScriptで動的に生成 -->
+            <!-- 食費予算 -->
+            <div style="margin:15px 0;">
+                <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                    <div style="font-size:0.9rem;">食費</div>
+                    <div style="font-size:0.9rem;">¥12,000 / ¥30,000</div>
+                </div>
+                <div style="height:8px; background:#f0f0f0; border-radius:4px; overflow:hidden;">
+                    <div style="height:8px; width:40%; background:#7c4dff; border-radius:4px;"></div>
+                </div>
+            </div>
+            
+            <!-- 交通費予算 -->
+            <div style="margin:15px 0;">
+                <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                    <div style="font-size:0.9rem;">交通費</div>
+                    <div style="font-size:0.9rem;">¥8,500 / ¥15,000</div>
+                </div>
+                <div style="height:8px; background:#f0f0f0; border-radius:4px; overflow:hidden;">
+                    <div style="height:8px; width:57%; background:#7c4dff; border-radius:4px;"></div>
+                </div>
             </div>
             
             <!-- 余白（ナビゲーションバーの分） -->
@@ -520,13 +590,15 @@
         <!-- 統計タブ -->
         <div class="content tab-content" id="stats-tab">
             <div class="section-title">月別収支</div>
-            <div style="height: 250px; margin: 20px 0;">
-                <canvas id="monthlyChart" width="350" height="250"></canvas>
+            
+            <div style="height: 200px; margin: 20px 0; background: #f9f9f9; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                <p style="color: #777;">グラフが表示されます</p>
             </div>
             
-            <div class="section-title" style="margin-top:20px;">カテゴリー別支出</div>
-            <div style="height: 250px; margin: 20px 0;">
-                <canvas id="categoryChart" width="350" height="250"></canvas>
+            <div class="section-title">カテゴリー別支出</div>
+            
+            <div style="height: 200px; margin: 20px 0; background: #f9f9f9; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                <p style="color: #777;">グラフが表示されます</p>
             </div>
             
             <div class="form-padding"></div>
@@ -536,11 +608,37 @@
         <div class="content tab-content" id="budget-tab">
             <div class="section-title">月間予算設定</div>
             
-            <div id="budgetSettingsContainer">
-                <!-- 予算設定はJavaScriptで動的に生成 -->
+            <!-- 食費 -->
+            <div class="form-group">
+                <label class="form-label">食費</label>
+                <input type="number" class="form-input" value="30000" id="budget-food">
             </div>
             
-            <button class="btn btn-primary" style="width: 100%; margin-top: 20px; padding: 12px;" id="saveBudgetBtn">
+            <!-- 交通費 -->
+            <div class="form-group">
+                <label class="form-label">交通費</label>
+                <input type="number" class="form-input" value="15000" id="budget-transport">
+            </div>
+            
+            <!-- 娯楽費 -->
+            <div class="form-group">
+                <label class="form-label">娯楽費</label>
+                <input type="number" class="form-input" value="10000" id="budget-entertainment">
+            </div>
+            
+            <!-- 日用品 -->
+            <div class="form-group">
+                <label class="form-label">日用品</label>
+                <input type="number" class="form-input" value="8000" id="budget-groceries">
+            </div>
+            
+            <!-- その他 -->
+            <div class="form-group">
+                <label class="form-label">その他</label>
+                <input type="number" class="form-input" value="7000" id="budget-others">
+            </div>
+            
+            <button class="btn btn-primary" style="width: 100%; margin-top: 20px;" id="saveBudgetBtn">
                 予算を保存
             </button>
             
@@ -621,260 +719,461 @@
         </div>
     </div>
     
-    <!-- 全取引表示モーダル -->
-    <div class="modal-overlay" id="allTransactionsModal">
-        <div class="modal" style="height: 80%; overflow-y: auto;">
-            <div class="modal-title">すべての取引</div>
-            
-            <div id="allTransactionsList">
-                <!-- すべての取引はJavaScriptで動的に生成 -->
-            </div>
-            
-            <div class="button-group">
-                <button class="btn btn-cancel" id="closeAllTransactionsBtn" style="width: 100%;">閉じる</button>
-            </div>
-        </div>
-    </div>
-    
     <!-- フィードバックメッセージ -->
     <div class="feedback-message" id="feedbackMessage"></div>
     
     <script>
-        // Chart.jsのCDNインポート
-        function loadScript(url, callback) {
-            const script = document.createElement('script');
-            script.src = url;
-            script.onload = callback;
-            document.head.appendChild(script);
-        }
-
-        // Chart.jsをロードしてから初期化
-        loadScript('https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.1/chart.min.js', initApp);
-
-        // チャートのインスタンス
-        let donutChartInstance = null;
-        let monthlyChartInstance = null;
-        let categoryChartInstance = null;
-
-        function initApp() {
-            // データの初期化
-            initializeData();
-            
-            // UI関連の初期化
-            setupEventListeners();
-            updateUIComponents();
-            
-            // タブの切り替え処理
-            const tabs = document.querySelectorAll('.tab');
-            tabs.forEach(tab => {
-                tab.addEventListener('click', () => {
-                    const tabId = tab.getAttribute('data-tab');
-                    
-                    // タブのアクティブ状態更新
-                    tabs.forEach(t => t.classList.remove('active'));
-                    tab.classList.add('active');
-                    
-                    // コンテンツ表示切替
-                    document.querySelectorAll('.tab-content').forEach(content => {
-                        content.classList.remove('active');
-                    });
-                    document.getElementById(`${tabId}-tab`).classList.add('active');
-                    
-                    // チャートの更新
-                    if (tabId === 'stats') {
-                        updateMonthlyChart();
-                        updateCategoryChart();
-                    } else if (tabId === 'home') {
-                        updateDonutChart();
-                    }
+        // タブの切り替え
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                // すべてのタブから active クラスを削除
+                document.querySelectorAll('.tab').forEach(t => {
+                    t.classList.remove('active');
                 });
-            });
-            
-            // ナビゲーションバーのイベント
-            const navItems = document.querySelectorAll('.nav-item');
-            navItems.forEach(item => {
-                item.addEventListener('click', () => {
-                    navItems.forEach(navItem => navItem.classList.remove('active'));
-                    item.classList.add('active');
-                    
-                    const page = item.getAttribute('data-page');
-                    if (page === 'home' || page === 'stats' || page === 'budget') {
-                        // タブをクリックするように動作させる
-                        document.querySelector(`.tab[data-tab="${page}"]`).click();
-                    } else if (page === 'transactions') {
-                        showAllTransactions();
-                    } else if (page === 'settings') {
-                        showSettings();
-                    }
-                });
-            });
-            
-            // 現在の日付表示
-            updateCurrentPeriod();
-        }
-
-        // データの初期化
-        function initializeData() {
-            // ローカルストレージにデータがなければ初期化
-            if (!localStorage.getItem('budgetAppTransactions')) {
-                // サンプルデータ
-                const sampleTransactions = [
-                    {
-                        id: 1,
-                        type: 'expense',
-                        amount: 550,
-                        category: 'food',
-                        memo: '昼食（学食）',
-                        date: new Date().toISOString().split('T')[0],
-                        timestamp: new Date().getTime()
-                    },
-                    {
-                        id: 2,
-                        type: 'expense',
-                        amount: 480,
-                        category: 'transport',
-                        memo: '電車（往復）',
-                        date: new Date().toISOString().split('T')[0],
-                        timestamp: new Date().getTime() - 3600000
-                    },
-                    {
-                        id: 3,
-                        type: 'expense',
-                        amount: 1800,
-                        category: 'entertainment',
-                        memo: '映画チケット',
-                        date: new Date(new Date().setDate(new Date().getDate() - 1)).toISOString().split('T')[0],
-                        timestamp: new Date().getTime() - 86400000
-                    },
-                    {
-                        id: 4,
-                        type: 'income',
-                        amount: 28500,
-                        category: 'income',
-                        memo: 'アルバイト収入',
-                        date: '2025-03-10',
-                        timestamp: new Date('2025-03-10').getTime()
-                    }
-                ];
                 
-                localStorage.setItem('budgetAppTransactions', JSON.stringify(sampleTransactions));
-            }
-            
-            // 予算データがなければ初期化
-            if (!localStorage.getItem('budgetAppBudgets')) {
-                const sampleBudgets = {
-                    food: 30000,
-                    transport: 15000,
-                    entertainment: 10000,
-                    groceries: 8000,
-                    others: 7000
-                };
+                // クリックされたタブに active クラスを追加
+                this.classList.add('active');
                 
-                localStorage.setItem('budgetAppBudgets', JSON.stringify(sampleBudgets));
-            }
-        }
-
-        // 現在の期間表示を更新
-        function updateCurrentPeriod() {
-            const now = new Date();
-            const year = now.getFullYear();
-            const month = now.getMonth() + 1;
-            
-            const firstDay = new Date(year, now.getMonth(), 1);
-            const lastDay = new Date(year, now.getMonth() + 1, 0);
-            
-            const formatDate = (date) => {
-                return `${date.getMonth() + 1}月${date.getDate()}日`;
-            };
-            
-            const periodText = `${formatDate(firstDay)} - ${formatDate(lastDay)}`;
-            document.getElementById('currentPeriod').textContent = periodText;
-        }
-
-        // イベントリスナーのセットアップ
-        function setupEventListeners() {
-            // 取引追加ボタン
-            document.getElementById('addTransactionBtn').addEventListener('click', () => {
-                // デフォルトで今日の日付をセット
-                document.getElementById('dateInput').value = new Date().toISOString().split('T')[0];
-                document.getElementById('addTransactionModal').style.display = 'flex';
-            });
-            
-            // 取引タイプ切り替え（収入/支出）
-            document.querySelectorAll('input[name="transactionType"]').forEach(radio => {
-                radio.addEventListener('change', (e) => {
-                    const categorySelect = document.getElementById('categorySelect');
-                    const incomeOption = categorySelect.querySelector('option[value="income"]');
-                    
-                    if (e.target.value === 'income') {
-                        // 収入の場合、カテゴリーを収入に固定
-                        Array.from(categorySelect.options).forEach(option => {
-                            option.style.display = option.value === 'income' ? '' : 'none';
-                        });
-                        incomeOption.style.display = '';
-                        incomeOption.selected = true;
-                    } else {
-                        // 支出の場合、収入カテゴリー以外を表示
-                        Array.from(categorySelect.options).forEach(option => {
-                            option.style.display = option.value === 'income' ? 'none' : '';
-                        });
-                        if (categorySelect.value === 'income') {
-                            categorySelect.value = 'food';
-                        }
-                    }
+                // タブのデータ属性からタブIDを取得
+                const tabId = this.getAttribute('data-tab');
+                
+                // すべてのタブコンテンツを非表示にする
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.classList.remove('active');
                 });
+                
+                // 対応するタブコンテンツを表示する
+                document.getElementById(tabId + '-tab').classList.add('active');
             });
-            
-            // キャンセルボタン
-            document.getElementById('cancelTransactionBtn').addEventListener('click', () => {
-                document.getElementById('addTransactionModal').style.display = 'none';
+        });
+        
+        // ナビゲーションの切り替え
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', function() {
+                // すべてのナビアイテムから active クラスを削除
+                document.querySelectorAll('.nav-item').forEach(navItem => {
+                    navItem.classList.remove('active');
+                });
+                
+                // クリックされたナビアイテムに active クラスを追加
+                this.classList.add('active');
+                
+                // ページの種類を取得
+                const page = this.getAttribute('data-page');
+                
+                // ホーム、統計、予算の場合は対応するタブを表示
+                if (page === 'home' || page === 'stats' || page === 'budget') {
+                    document.querySelector(`.tab[data-tab="${page}"]`).click();
+                }
+                // 取引一覧を表示
+                else if (page === 'transactions') {
+                    // 取引一覧モーダルが実装されていれば表示する
+                    showNotification('取引一覧機能は現在開発中です');
+                }
+                // 設定画面を表示
+                else if (page === 'settings') {
+                    showNotification('設定機能は現在開発中です');
+                }
             });
+        });
+        
+        // 追加ボタンのクリックイベント
+        document.getElementById('addTransactionBtn').addEventListener('click', function() {
+            document.getElementById('addTransactionModal').style.display = 'flex';
             
-            // 保存ボタン
-            document.getElementById('saveTransactionBtn').addEventListener('click', saveTransaction);
+            // 今日の日付をデフォルト値として設定
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('dateInput').value = today;
+        });
+        
+        // モーダルのキャンセルボタン
+        document.getElementById('cancelTransactionBtn').addEventListener('click', function() {
+            document.getElementById('addTransactionModal').style.display = 'none';
+        });
+        
+        // モーダルの保存ボタン
+        document.getElementById('saveTransactionBtn').addEventListener('click', function() {
+            // フォームの値を取得
+            const type = document.querySelector('input[name="transactionType"]:checked').value;
+            const amount = document.getElementById('amountInput').value;
+            const category = document.getElementById('categorySelect').value;
+            const memo = document.getElementById('memoInput').value;
+            const date = document.getElementById('dateInput').value;
             
-            // すべての取引を表示
-            document.getElementById('viewAllTransactions').addEventListener('click', showAllTransactions);
-            
-            // 取引一覧モーダルを閉じる
-            document.getElementById('closeAllTransactionsBtn').addEventListener('click', () => {
-                document.getElementById('allTransactionsModal').style.display = 'none';
-            });
-            
-            // 予算保存ボタン
-            document.getElementById('saveBudgetBtn').addEventListener('click', saveBudgets);
-            
-            // タッチ操作の高速化
-            document.addEventListener('touchstart', function() {}, {passive: true});
-        }
-
-        // UI要素の更新
-        function updateUIComponents() {
-            updateRecentTransactions();
-            updateDonutChart();
-            updateBudgetStatus();
-            updateTotalBalance();
-            updateBudgetSettings();
-        }
-
-        // 最近の取引を更新
-        function updateRecentTransactions() {
-            const transactions = getTransactions();
-            const transactionsContainer = document.getElementById('recentTransactions');
-            transactionsContainer.innerHTML = '';
-            
-            // 最新5件のみ表示
-            const recentTransactions = transactions.slice(0, 5);
-            
-            if (recentTransactions.length === 0) {
-                transactionsContainer.innerHTML = '<p style="text-align: center; padding: 20px; color: #777;">取引データがありません</p>';
+            // 入力チェック
+            if (!amount || amount <= 0) {
+                showNotification('金額を正しく入力してください');
                 return;
             }
             
-            recentTransactions.forEach(transaction => {
-                const transactionElement = createTransactionElement(transaction);
-                transactionsContainer.appendChild(transactionElement);
-            });
-        }
+            if (!memo) {
+                showNotification('メモを入力してください');
+                return;
+            }
+            
+            if (!date) {
+                showNotification('日付を選択してください');
+                return;
+            }
+            
+            // 取引を保存（実際にはここでデータを保存）
+            showNotification('取引を保存しました');
+            
+            // モーダルを閉じる
+            document.getElementById('addTransactionModal').style.display = 'none';
+            
+            // フォームをリセット
+            document.getElementById('amountInput').value = '';
+            document.getElementById('memoInput').value = '';
+        });
+        
+        // 取引タイプの変更時の処理
+        document.querySelectorAll('input[name="transactionType"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                const categorySelect = document.getElementById('categorySelect');
+                const incomeOption = categorySelect.querySelector('option[value="income"]');
+                
+                if (this.value === 'income') {
+                    // 収入の場合、カテゴリーを「収入」に固定
+                    Array.from(categorySelect.options).forEach(option => {
+                        option.style.display = option.value === 'income' ? '' : 'none';
+                    });
+                    incomeOption.style.display = '';
+                    incomeOption.selected = true;
+                } else {
+                    // 支出の場合、「収入」カテゴリ
+// HTML ファイルの最後のscriptタグの続き
 
-        // 取引要素を
+    // 支出の場合、「収入」カテゴリー以外を表示
+    } else {
+        // 支出の場合、「収入」カテゴリー以外を表示
+        Array.from(categorySelect.options).forEach(option => {
+            option.style.display = option.value === 'income' ? 'none' : '';
+        });
+        
+        // 選択されている値が「収入」なら「食費」に変更
+        if (categorySelect.value === 'income') {
+            categorySelect.value = 'food';
+        }
+    }
+});
+
+// 予算保存ボタンのクリックイベント
+document.getElementById('saveBudgetBtn').addEventListener('click', function() {
+    // 各カテゴリーの予算を取得
+    const foodBudget = document.getElementById('budget-food').value;
+    const transportBudget = document.getElementById('budget-transport').value;
+    const entertainmentBudget = document.getElementById('budget-entertainment').value;
+    const groceriesBudget = document.getElementById('budget-groceries').value;
+    const othersBudget = document.getElementById('budget-others').value;
+    
+    // 入力チェック
+    if (!foodBudget || !transportBudget || !entertainmentBudget || !groceriesBudget || !othersBudget) {
+        showNotification('すべての予算を入力してください');
+        return;
+    }
+    
+    // 予算を保存（この部分は実際のデータ保存処理に置き換える）
+    const budgets = {
+        food: parseFloat(foodBudget),
+        transport: parseFloat(transportBudget),
+        entertainment: parseFloat(entertainmentBudget),
+        groceries: parseFloat(groceriesBudget),
+        others: parseFloat(othersBudget)
+    };
+    
+    // ローカルストレージに保存
+    localStorage.setItem('budgetAppBudgets', JSON.stringify(budgets));
+    
+    showNotification('予算を保存しました');
+});
+
+// すべての取引を見るボタンのクリックイベント
+document.getElementById('viewAllTransactions').addEventListener('click', function() {
+    showNotification('全ての取引を表示します（開発中）');
+});
+
+// 予算詳細を見るボタンのクリックイベント
+document.getElementById('viewBudgetDetails').addEventListener('click', function() {
+    showNotification('予算詳細を表示します（開発中）');
+});
+
+// 通知メッセージを表示する関数
+function showNotification(message) {
+    const feedbackElement = document.getElementById('feedbackMessage');
+    feedbackElement.textContent = message;
+    feedbackElement.classList.add('show');
+    
+    // 3秒後に非表示にする
+    setTimeout(() => {
+        feedbackElement.classList.remove('show');
+    }, 3000);
+}
+
+// LocalStorageからデータを取得する関数
+function getTransactions() {
+    const transactionsJSON = localStorage.getItem('budgetAppTransactions');
+    if (transactionsJSON) {
+        return JSON.parse(transactionsJSON);
+    }
+    return [];
+}
+
+// LocalStorageから予算を取得する関数
+function getBudgets() {
+    const budgetsJSON = localStorage.getItem('budgetAppBudgets');
+    if (budgetsJSON) {
+        return JSON.parse(budgetsJSON);
+    }
+    return {
+        food: 30000,
+        transport: 15000,
+        entertainment: 10000,
+        groceries: 8000,
+        others: 7000
+    };
+}
+
+// 取引を追加する関数
+function addTransaction(transaction) {
+    const transactions = getTransactions();
+    transactions.unshift(transaction); // 配列の先頭に追加
+    localStorage.setItem('budgetAppTransactions', JSON.stringify(transactions));
+}
+
+// 日付をフォーマットする関数
+function formatDate(dateStr) {
+    const date = new Date(dateStr);
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(today.getDate() - 1);
+    
+    // 日付をYYYY-MM-DD形式に変換
+    const formatYMD = (d) => {
+        return d.getFullYear() + '-' + 
+               String(d.getMonth() + 1).padStart(2, '0') + '-' + 
+               String(d.getDate()).padStart(2, '0');
+    };
+    
+    if (formatYMD(date) === formatYMD(today)) {
+        return '今日';
+    } else if (formatYMD(date) === formatYMD(yesterday)) {
+        return '昨日';
+    } else {
+        return `${date.getMonth() + 1}月${date.getDate()}日`;
+    }
+}
+
+// 保存ボタンのクリックイベント（実際のデータ保存処理）
+document.getElementById('saveTransactionBtn').addEventListener('click', function() {
+    // フォームの値を取得
+    const type = document.querySelector('input[name="transactionType"]:checked').value;
+    const amountInput = document.getElementById('amountInput');
+    const categorySelect = document.getElementById('categorySelect');
+    const memoInput = document.getElementById('memoInput');
+    const dateInput = document.getElementById('dateInput');
+    
+    const amount = parseFloat(amountInput.value);
+    const category = categorySelect.value;
+    const memo = memoInput.value;
+    const date = dateInput.value;
+    
+    // 入力チェック
+    if (!amount || amount <= 0) {
+        showNotification('金額を正しく入力してください');
+        return;
+    }
+    
+    if (!memo) {
+        showNotification('メモを入力してください');
+        return;
+    }
+    
+    if (!date) {
+        showNotification('日付を選択してください');
+        return;
+    }
+    
+    // 取引データを作成
+    const transaction = {
+        id: Date.now(), // ユニークIDとして現在のタイムスタンプを使用
+        type: type,
+        amount: amount,
+        category: category,
+        memo: memo,
+        date: date,
+        timestamp: new Date(date).getTime()
+    };
+    
+    // 取引を保存
+    addTransaction(transaction);
+    
+    // 取引リストを更新
+    updateTransactionsList();
+    
+    // 残高を更新
+    updateBalance();
+    
+    showNotification('取引を保存しました');
+    
+    // モーダルを閉じる
+    document.getElementById('addTransactionModal').style.display = 'none';
+    
+    // フォームをリセット
+    amountInput.value = '';
+    memoInput.value = '';
+});
+
+// 取引リストを更新する関数
+function updateTransactionsList() {
+    const transactions = getTransactions();
+    const transactionsContainer = document.getElementById('recentTransactions');
+    
+    // コンテナをクリア
+    transactionsContainer.innerHTML = '';
+    
+    // 最新5件のみ表示
+    const recentTransactions = transactions.slice(0, 5);
+    
+    if (recentTransactions.length === 0) {
+        transactionsContainer.innerHTML = '<p style="text-align: center; padding: 20px; color: #777;">取引データがありません</p>';
+        return;
+    }
+    
+    // 各取引の要素を作成して追加
+    recentTransactions.forEach(transaction => {
+        const transactionElement = document.createElement('div');
+        transactionElement.className = 'transaction-item';
+        
+        // カテゴリごとの絵文字
+        const categoryEmojis = {
+            food: '🍲',
+            transport: '🚃',
+            entertainment: '🎮',
+            income: '💼',
+            groceries: '🛒',
+            others: '📦'
+        };
+        
+        transactionElement.innerHTML = `
+            <div class="transaction-icon category-${transaction.category}">${categoryEmojis[transaction.category] || '📝'}</div>
+            <div class="transaction-details">
+                <div class="transaction-title">${transaction.memo}</div>
+                <div class="transaction-date">${formatDate(transaction.date)}</div>
+            </div>
+            <div class="transaction-amount ${transaction.type === 'expense' ? 'expense' : 'income'}">
+                ${transaction.type === 'expense' ? '-' : '+'}¥${transaction.amount.toLocaleString()}
+            </div>
+        `;
+        
+        transactionsContainer.appendChild(transactionElement);
+    });
+}
+
+// 残高を更新する関数
+function updateBalance() {
+    const transactions = getTransactions();
+    let totalBalance = 0;
+    
+    transactions.forEach(transaction => {
+        if (transaction.type === 'income') {
+            totalBalance += transaction.amount;
+        } else {
+            totalBalance -= transaction.amount;
+        }
+    });
+    
+    // 残高表示を更新
+    document.getElementById('totalBalance').textContent = `¥${totalBalance.toLocaleString()}`;
+}
+
+// アプリの初期化
+function initApp() {
+    // 保存されたデータがなければ初期データを設定
+    if (!localStorage.getItem('budgetAppTransactions')) {
+        // サンプルデータ
+        const sampleTransactions = [
+            {
+                id: 1,
+                type: 'expense',
+                amount: 550,
+                category: 'food',
+                memo: '昼食（学食）',
+                date: new Date().toISOString().split('T')[0],
+                timestamp: new Date().getTime()
+            },
+            {
+                id: 2,
+                type: 'expense',
+                amount: 480,
+                category: 'transport',
+                memo: '電車（往復）',
+                date: new Date().toISOString().split('T')[0],
+                timestamp: new Date().getTime() - 3600000
+            },
+            {
+                id: 3,
+                type: 'expense',
+                amount: 1800,
+                category: 'entertainment',
+                memo: '映画チケット',
+                date: new Date(new Date().setDate(new Date().getDate() - 1)).toISOString().split('T')[0],
+                timestamp: new Date().getTime() - 86400000
+            },
+            {
+                id: 4,
+                type: 'income',
+                amount: 28500,
+                category: 'income',
+                memo: 'アルバイト収入',
+                date: '2025-03-10',
+                timestamp: new Date('2025-03-10').getTime()
+            }
+        ];
+        
+        localStorage.setItem('budgetAppTransactions', JSON.stringify(sampleTransactions));
+    }
+    
+    // 保存された予算データがなければ初期データを設定
+    if (!localStorage.getItem('budgetAppBudgets')) {
+        const initialBudgets = {
+            food: 30000,
+            transport: 15000,
+            entertainment: 10000,
+            groceries: 8000,
+            others: 7000
+        };
+        
+        localStorage.setItem('budgetAppBudgets', JSON.stringify(initialBudgets));
+    }
+    
+    // フォーム入力欄に予算データを表示
+    const budgets = getBudgets();
+    document.getElementById('budget-food').value = budgets.food;
+    document.getElementById('budget-transport').value = budgets.transport;
+    document.getElementById('budget-entertainment').value = budgets.entertainment;
+    document.getElementById('budget-groceries').value = budgets.groceries;
+    document.getElementById('budget-others').value = budgets.others;
+    
+    // 残高を更新
+    updateBalance();
+    
+    // 現在の期間表示を更新
+    updateCurrentPeriod();
+}
+
+// 現在の期間表示を更新する関数
+function updateCurrentPeriod() {
+    const now = new Date();
+    const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+    const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+    
+    const formatDate = (date) => {
+        return `${date.getMonth() + 1}月${date.getDate()}日`;
+    };
+    
+    document.getElementById('currentPeriod').textContent = `${formatDate(firstDay)} - ${formatDate(lastDay)}`;
+}
+
+// アプリ初期化を実行
+initApp();
