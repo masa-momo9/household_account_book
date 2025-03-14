@@ -17,6 +17,7 @@
             background-color: #f9f9f9;
             color: #333;
             line-height: 1.6;
+            touch-action: manipulation;
         }
         
         /* モバイルファーストデザイン */
@@ -87,6 +88,7 @@
             color: #777;
             position: relative;
             cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
         }
         
         .tab.active {
@@ -124,6 +126,7 @@
             color: #7c4dff;
             font-weight: normal;
             cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
         }
         
         /* 最近の取引 */
@@ -242,6 +245,7 @@
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
             z-index: 100;
             cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
         }
         
         /* ナビゲーションバー */
@@ -267,6 +271,7 @@
             color: #777;
             font-size: 0.7rem;
             cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
         }
         
         .nav-icon {
@@ -377,6 +382,7 @@
             border: none;
             font-size: 1rem;
             cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
         }
         
         .btn-cancel {
@@ -419,6 +425,36 @@
             height: 8px;
             background: #7c4dff;
             border-radius: 4px;
+        }
+        
+        /* 入力フォーム用の大きいボタン (スマホ対応) */
+        .budget-input {
+            width: 100%;
+            height: 44px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+        
+        /* フィードバックメッセージ */
+        .feedback-message {
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            z-index: 1001;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .feedback-message.show {
+            opacity: 1;
         }
     </style>
 </head>
@@ -504,7 +540,7 @@
                 <!-- 予算設定はJavaScriptで動的に生成 -->
             </div>
             
-            <button class="btn btn-primary" style="width: 100%; margin-top: 20px;" id="saveBudgetBtn">
+            <button class="btn btn-primary" style="width: 100%; margin-top: 20px; padding: 12px;" id="saveBudgetBtn">
                 予算を保存
             </button>
             
@@ -600,9 +636,10 @@
         </div>
     </div>
     
+    <!-- フィードバックメッセージ -->
+    <div class="feedback-message" id="feedbackMessage"></div>
+    
     <script>
-        // クライアントサイドのJavaScript
-
         // Chart.jsのCDNインポート
         function loadScript(url, callback) {
             const script = document.createElement('script');
@@ -613,6 +650,11 @@
 
         // Chart.jsをロードしてから初期化
         loadScript('https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.1/chart.min.js', initApp);
+
+        // チャートのインスタンス
+        let donutChartInstance = null;
+        let monthlyChartInstance = null;
+        let categoryChartInstance = null;
 
         function initApp() {
             // データの初期化
@@ -656,11 +698,13 @@
                     item.classList.add('active');
                     
                     const page = item.getAttribute('data-page');
-                    if (page === 'home' || page === 'stats') {
+                    if (page === 'home' || page === 'stats' || page === 'budget') {
                         // タブをクリックするように動作させる
                         document.querySelector(`.tab[data-tab="${page}"]`).click();
                     } else if (page === 'transactions') {
                         showAllTransactions();
+                    } else if (page === 'settings') {
+                        showSettings();
                     }
                 });
             });
@@ -799,6 +843,9 @@
             
             // 予算保存ボタン
             document.getElementById('saveBudgetBtn').addEventListener('click', saveBudgets);
+            
+            // タッチ操作の高速化
+            document.addEventListener('touchstart', function() {}, {passive: true});
         }
 
         // UI要素の更新
@@ -830,42 +877,4 @@
             });
         }
 
-        // 取引要素を作成
-        function createTransactionElement(transaction) {
-            const div = document.createElement('div');
-            div.className = 'transaction-item';
-            
-            const formatDate = (dateStr) => {
-                const today = new Date().toISOString().split('T')[0];
-                const yesterday = new Date(new Date().setDate(new Date().getDate() - 1)).toISOString().split('T')[0];
-                
-                if (dateStr === today) {
-                    return '今日';
-                } else if (dateStr === yesterday) {
-                    return '昨日';
-                } else {
-                    const date = new Date(dateStr);
-                    return `${date.getMonth() + 1}月${date.getDate()}日`;
-                }
-            };
-            
-            // カテゴリごとの絵文字
-            const categoryEmojis = {
-                food: '🍲',
-                transport: '🚃',
-                entertainment: '🎮',
-                income: '💼',
-                groceries: '🛒',
-                others: '📦'
-            };
-            
-            div.innerHTML = `
-                <div class="transaction-icon category-${transaction.category}">${categoryEmojis[transaction.category] || '📝'}</div>
-                <div class="transaction-details">
-                    <div class="transaction-title">${transaction.memo}</div>
-                    <div class="transaction-date">${formatDate(transaction.date)}</div>
-                </div>
-                <div class="transaction-amount ${transaction.type === 'expense' ? 'expense' : 'income'}">
-                    ${transaction.type === 'expense' ? '-' : '+'}¥${transaction.amount.toLocaleString()}
-                </div>
-            
+        // 取引要素を
