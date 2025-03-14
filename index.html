@@ -114,6 +114,7 @@
             border-bottom: 1px solid #eee;
             display: flex;
             justify-content: space-between;
+            align-items: center;
         }
         
         .transaction-item:last-child {
@@ -136,6 +137,7 @@
         
         .transaction-amount {
             font-weight: bold;
+            margin-right: 15px;
         }
         
         .expense {
@@ -170,6 +172,80 @@
         
         .message.show {
             opacity: 1;
+        }
+        
+        .delete-btn {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .delete-btn:hover {
+            background-color: #c0392b;
+        }
+        
+        .transaction-right {
+            display: flex;
+            align-items: center;
+        }
+        
+        /* 確認モーダル */
+        .confirm-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+        
+        .confirm-dialog {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 300px;
+            text-align: center;
+        }
+        
+        .confirm-message {
+            margin-bottom: 20px;
+        }
+        
+        .confirm-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .confirm-btn {
+            padding: 8px 15px;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .confirm-cancel {
+            background-color: #95a5a6;
+            color: white;
+        }
+        
+        .confirm-delete {
+            background-color: #e74c3c;
+            color: white;
         }
     </style>
 </head>
@@ -234,6 +310,17 @@
     
     <div class="message" id="message"></div>
     
+    <!-- 確認モーダル -->
+    <div class="confirm-modal" id="confirmModal">
+        <div class="confirm-dialog">
+            <div class="confirm-message">この取引を削除しますか？</div>
+            <div class="confirm-buttons">
+                <button class="confirm-btn confirm-cancel" id="cancelDelete">キャンセル</button>
+                <button class="confirm-btn confirm-delete" id="confirmDelete">削除</button>
+            </div>
+        </div>
+    </div>
+    
     <script>
         // DOM要素の参照を取得
         const typeRadios = document.querySelectorAll('input[name="type"]');
@@ -245,6 +332,12 @@
         const transactionList = document.getElementById('transactionList');
         const totalBalanceElement = document.getElementById('totalBalance');
         const messageElement = document.getElementById('message');
+        const confirmModal = document.getElementById('confirmModal');
+        const cancelDeleteBtn = document.getElementById('cancelDelete');
+        const confirmDeleteBtn = document.getElementById('confirmDelete');
+        
+        // 削除対象のID
+        let deleteTargetId = null;
         
         // 今日の日付をデフォルト値として設定
         dateInput.value = new Date().toISOString().split('T')[0];
@@ -323,10 +416,38 @@
             showMessage('取引を追加しました');
         });
         
+        // 削除キャンセルボタンのクリックイベント
+        cancelDeleteBtn.addEventListener('click', function() {
+            confirmModal.style.display = 'none';
+            deleteTargetId = null;
+        });
+        
+        // 削除確認ボタンのクリックイベント
+        confirmDeleteBtn.addEventListener('click', function() {
+            if (deleteTargetId) {
+                deleteTransaction(deleteTargetId);
+                confirmModal.style.display = 'none';
+                deleteTargetId = null;
+                
+                // UI更新
+                updateTransactionList();
+                updateBalance();
+                
+                showMessage('取引を削除しました');
+            }
+        });
+        
         // 取引を保存する関数
         function saveTransaction(transaction) {
             let transactions = getTransactions();
             transactions.unshift(transaction); // 新しい取引を配列の先頭に追加
+            localStorage.setItem('simpleTransactions', JSON.stringify(transactions));
+        }
+        
+        // 取引を削除する関数
+        function deleteTransaction(id) {
+            let transactions = getTransactions();
+            transactions = transactions.filter(transaction => transaction.id != id);
             localStorage.setItem('simpleTransactions', JSON.stringify(transactions));
         }
         
@@ -361,12 +482,23 @@
                         <div class="transaction-title">${transaction.memo}</div>
                         <div class="transaction-date">${formatDate(transaction.date)}</div>
                     </div>
-                    <div class="transaction-amount ${transaction.type === 'expense' ? 'expense' : 'income'}">
-                        ${transaction.type === 'expense' ? '-' : '+'}¥${transaction.amount.toLocaleString()}
+                    <div class="transaction-right">
+                        <div class="transaction-amount ${transaction.type === 'expense' ? 'expense' : 'income'}">
+                            ${transaction.type === 'expense' ? '-' : '+'}¥${transaction.amount.toLocaleString()}
+                        </div>
+                        <button class="delete-btn" data-id="${transaction.id}">×</button>
                     </div>
                 `;
                 
                 transactionList.appendChild(li);
+            });
+            
+            // 削除ボタンにイベントリスナーを設定
+            document.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    deleteTargetId = this.getAttribute('data-id');
+                    confirmModal.style.display = 'flex';
+                });
             });
         }
         
